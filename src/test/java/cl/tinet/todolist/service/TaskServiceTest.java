@@ -1,30 +1,25 @@
-package cl.tinet.todolist.controller;
+package cl.tinet.todolist.service;
 
+import cl.tinet.todolist.dao.TaskRepository;
 import cl.tinet.todolist.exceptions.TaskException;
 import cl.tinet.todolist.model.Task;
-import cl.tinet.todolist.service.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * Test class for Task service.
+ */
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(TaskController.class)
-class TaskControllerTest {
+class TaskServiceTest {
     /**
      * Dummy value for id Task attribute.
      */
@@ -61,27 +56,32 @@ class TaskControllerTest {
     private final static String UPDATED_AT = "01-01-2021 00:00:00";
 
     /**
-     * Mock to perform the request.
-     */
-    @Autowired
-    private MockMvc mockMvc;
-
-    /**
-     * Mock service to replace the real service behavior.
-     */
-    @MockBean
-    private TaskService taskService;
-
-    /**
      * Dummy Task to be used in test.
      */
     private Task task;
+
+    /**
+     * Dummy List to use in test.
+     */
+    private List<Task> tasks = new ArrayList<>();
+
+    /**
+     * Dummy service.
+     */
+    private TaskService taskService;
+
+    /**
+     * Mock service to replace the real repository behavior.
+     */
+    @MockBean
+    private TaskRepository taskRepository;
 
     /**
      * Setup the necessary state to perform this test.
      */
     @BeforeEach
     void setup() {
+        taskService = new TaskService(taskRepository);
         task = Task.builder()
                 .id(ID)
                 .title(TITLE)
@@ -90,35 +90,32 @@ class TaskControllerTest {
                 .active(ACTIVE)
                 .createAt(CREATE_AT)
                 .updatedAt(UPDATED_AT).build();
+
+        tasks.add(task);
     }
 
     /**
-     * Performs a valid request to get all task
-     *
+     * Test getTask service when is OK
      */
     @Test
-    void getAllTaskOK() throws Exception{
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
-        when(taskService.getTasks()).thenReturn(tasks);
-
-        MvcResult mvcResult = mockMvc.perform(
-                get("/api/v1/task").contentType("application/json")
-        ).andExpect(status().isOk()).andReturn();
+    void getTasksOk() {
+        when(taskRepository.findAll()).thenReturn(tasks);
+        List<Task> tasksTest = taskService.getTasks();
+        assertEquals(tasks.size(), tasksTest.size());
     }
 
     /**
-     * Performs an invalid request to get all task
-     *
+     * Test getTask service when is not OK
      */
     @Test
-    void getAllTaskNOK() throws Exception{
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
-        when(taskService.getTasks()).thenThrow(TaskException.class);
-
-        MvcResult mvcResult = mockMvc.perform(
-                get("/api/v1/task").contentType("application/json")
-        ).andExpect(status().is(HttpStatus.EXPECTATION_FAILED.value())).andReturn();
+    void getTasksNOk() {
+        when(taskRepository.findAll()).thenThrow(TaskException.class);
+        boolean isNotOk = false;
+        try{
+            taskService.getTasks();
+        }catch(TaskException e){
+            isNotOk = true;
+        }
+        assertTrue(isNotOk);
     }
 }
