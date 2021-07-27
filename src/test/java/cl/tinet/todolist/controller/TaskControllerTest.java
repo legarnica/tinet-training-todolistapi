@@ -17,6 +17,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import static org.mockito.Mockito.when;
@@ -102,9 +105,9 @@ class TaskControllerTest {
         tasks.add(task);
         when(taskService.getTasks()).thenReturn(tasks);
 
-        MvcResult mvcResult = mockMvc.perform(
+        mockMvc.perform(
                 get("/api/v1/task").contentType("application/json")
-        ).andExpect(status().isOk()).andReturn();
+        ).andExpect(status().isOk());
     }
 
     /**
@@ -113,12 +116,37 @@ class TaskControllerTest {
      */
     @Test
     void getAllTaskNOK() throws Exception{
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task);
         when(taskService.getTasks()).thenThrow(TaskException.class);
+        mockMvc.perform(
+                get("/api/v1/task").contentType("application/json")
+        ).andExpect(status().is(HttpStatus.EXPECTATION_FAILED.value()));
+    }
+
+    /**
+     * Performs a valid request to get task by id 1
+     *
+     */
+    @Test
+    void getTaskByIdOk() throws Exception{
+        String id = "1";
+        when(taskService.getTaskById(id)).thenReturn(task);
 
         MvcResult mvcResult = mockMvc.perform(
-                get("/api/v1/task").contentType("application/json")
-        ).andExpect(status().is(HttpStatus.EXPECTATION_FAILED.value())).andReturn();
+                get("/api/v1/task/1").contentType("application/json")
+        ).andExpect(status().isOk()).andReturn();
+        String task = mvcResult.getResponse().getContentAsString();
+
+        assertTrue(task.contains(DESCRIPTION));
+    }
+
+    /**
+     * Performs an invalid request to get task by any id.
+     */
+    @Test
+    void getTaskByIdNOk() throws Exception {
+        when(taskService.getTaskById(anyString())).thenThrow(TaskException.class);
+        mockMvc.perform(
+                get("/api/v1/task/1").contentType("application/json")
+        ).andExpect(status().is(HttpStatus.EXPECTATION_FAILED.value()));
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -117,5 +118,62 @@ class TaskServiceTest {
             isNotOk = true;
         }
         assertTrue(isNotOk);
+    }
+
+    /**
+     * verify if the getTaskById works with a valid id.
+     */
+    @Test
+    void getTaskByIdOk() {
+        String id = "1";
+        Long taskId = Long.valueOf(id);
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(task));
+        Task responseTask = taskService.getTaskById(id);
+
+        assertEquals(task.getId(), responseTask.getId());
+    }
+
+    /**
+     * verify if the getTaskById works with a valid id,
+     * but no result.
+     */
+    @Test
+    void getTaskByIdNOk() {
+        String id = "200";
+        Long taskId = Long.valueOf(id);
+        Task emptyTask = Task.builder().build();
+
+        boolean thereIsNotTaskWithThisId = false;
+
+        when(taskRepository.findById(taskId)).thenReturn(Optional.of(emptyTask));
+
+        try {
+            taskService.getTaskById(id);
+        }catch (TaskException e) {
+            thereIsNotTaskWithThisId = true;
+        }
+
+        assertTrue(thereIsNotTaskWithThisId);
+    }
+
+    /**
+     * verify if the getTaskById service, handle an invalid
+     * parameter.
+     *
+     * The repository is not call, the service throws an exception
+     * before to execute repository.
+     *
+     */
+    @Test
+    void getTaskByIdNotOKParsing() {
+        String id = "q";
+        boolean isInvalidParameter = false;
+
+        try {
+            taskService.getTaskById(id);
+        }catch (Exception e) {
+            isInvalidParameter = true;
+        }
+        assertTrue(isInvalidParameter);
     }
 }
