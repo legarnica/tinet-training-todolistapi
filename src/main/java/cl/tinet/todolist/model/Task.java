@@ -1,6 +1,7 @@
 package cl.tinet.todolist.model;
 
-import com.sun.istack.NotNull;
+
+import com.sun.istack.NotNull;//NOSONAR
 import lombok.*;
 
 import javax.persistence.*;
@@ -47,6 +48,13 @@ public class Task {
     @NotNull
     @Column(name = "state", nullable = false)
     private Integer state;
+
+    /**
+     * active field column.
+     */
+    @NotNull
+    @Column(name = "active", nullable = false)
+    private boolean active;
 
     /**
      * create_at field column.
