@@ -5,7 +5,6 @@ import cl.tinet.todolist.exceptions.TaskException;
 import cl.tinet.todolist.model.Task;
 import cl.tinet.todolist.model.TaskRequestTO;
 import cl.tinet.todolist.model.TaskResponseTO;
-import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -241,6 +241,17 @@ class TaskServiceTest {
             taskNotSet = true;
         }
         assertTrue(taskNotSet);
+    }
+
+    /**
+     * Verify update service of a task.
+     */
+    @Test
+    void updateTaskOk() {
+        when(taskRepository.findById(any())).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenReturn(task);
+        Task response = taskService.updateTask("1", taskRequestTO);
+        assertEquals(TITLE, response.getTitle());
     }
 
 }

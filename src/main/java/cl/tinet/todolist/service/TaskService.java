@@ -97,6 +97,7 @@ public class TaskService {
      * @param taskRequestTO data of task request.
      * @return data of inserted task response.
      */
+    @Transactional
     public TaskResponseTO setTask(TaskRequestTO taskRequestTO) {
         log.info("[setTask - init] [taskRequestTO] [{}]", taskRequestTO);
 
@@ -121,6 +122,31 @@ public class TaskService {
                 .state(taskSaved.getState())
                 .createAt(taskSaved.getCreateAt())
                 .updatedAt(taskSaved.getUpdatedAt()).build();
+    }
+
+    /**
+     * Update task service.
+     *
+     * @param requestId task id.
+     * @return updated task.
+     */
+    @Transactional
+    public Task updateTask(String requestId, TaskRequestTO requestBody) {
+        Task task = this.getTaskById(requestId);
+        task.setTitle(requestBody.getTitle());
+        task.setDescription(requestBody.getDescription());
+        task.setUpdatedAt(getActualDate());
+
+        Task updatedTask = null;
+
+        try {
+            updatedTask = taskRepository.save(task);
+        }catch (Exception e) {
+            log.error("[deleteTask - error] [task] [{}]",task);
+            throw new TaskException("error updating task");
+        }
+
+        return updatedTask;
     }
 
     /**

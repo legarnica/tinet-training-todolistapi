@@ -20,15 +20,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -231,15 +228,4 @@ class TaskControllerTest {
                         .contentType("application/json")
         ).andExpect(status().isNotModified());
     }
-
-//    /**
-//     * Performs an invalid request to get task by any id.
-//     */
-//    @Test
-//    void getTaskByIdNOk() throws Exception {
-//        when(taskService.getTaskById(anyString())).thenThrow(TaskException.class);
-//        mockMvc.perform(
-//                get("/api/v1/task/1").contentType("application/json")
-//        ).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
-//    }
 }
