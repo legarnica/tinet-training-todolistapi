@@ -2,7 +2,10 @@ package cl.tinet.todolist.controller;
 
 import cl.tinet.todolist.exceptions.TaskException;
 import cl.tinet.todolist.model.Task;
+import cl.tinet.todolist.model.TaskRequestTO;
+import cl.tinet.todolist.model.TaskResponseTO;
 import cl.tinet.todolist.service.TaskService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -81,6 +87,21 @@ class TaskControllerTest {
     private Task task;
 
     /**
+     * Dummy Task to save.
+     */
+    private Task taskToSave;
+
+    /**
+     * Dummy TaskResponseTO.
+     */
+    private TaskResponseTO taskResponseTO;
+
+    /**
+     * Dummy TaskRequestTO.
+     */
+    private TaskRequestTO taskRequestTO;
+
+    /**
      * Setup the necessary state to perform this test.
      */
     @BeforeEach
@@ -93,6 +114,26 @@ class TaskControllerTest {
                 .active(ACTIVE)
                 .createAt(CREATE_AT)
                 .updatedAt(UPDATED_AT).build();
+
+        taskToSave = Task.builder()
+                .title(TITLE)
+                .description(DESCRIPTION)
+                .state(STATE)
+                .active(ACTIVE)
+                .createAt(CREATE_AT)
+                .updatedAt(UPDATED_AT).build();
+
+        taskResponseTO = TaskResponseTO.builder()
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .state(task.getState())
+                .createAt(task.getCreateAt())
+                .updatedAt(task.getUpdatedAt()).build();
+
+        taskRequestTO = new TaskRequestTO();
+
+        taskRequestTO.setTitle(task.getTitle());
+        taskRequestTO.setDescription(task.getDescription());
     }
 
     /**
@@ -149,4 +190,56 @@ class TaskControllerTest {
                 get("/api/v1/task/1").contentType("application/json")
         ).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
+
+    public static String asJsonString(final Object obj) {
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            final String jsonContent = mapper.writeValueAsString(obj);
+            return jsonContent;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Performs a valid request to set task.
+     *
+     */
+    @Test
+    void setTaskOk() throws Exception{
+        when(taskService.setTask(taskRequestTO)).thenReturn(taskResponseTO);
+        String body = asJsonString(taskRequestTO);
+        mockMvc.perform(
+                post("/api/v1/task")
+                        .content(body)
+                        .contentType("application/json")
+        ).andExpect(status().isCreated());
+
+    }
+
+    /**
+     * Performs a invalid request to set task.
+     *
+     */
+    @Test
+    void setTaskNoOk() throws Exception {
+        when(taskService.setTask(any())).thenThrow(TaskException.class);
+        String body = asJsonString(taskRequestTO);
+        mockMvc.perform(
+                post("/api/v1/task")
+                        .content(body)
+                        .contentType("application/json")
+        ).andExpect(status().isNotModified());
+    }
+
+//    /**
+//     * Performs an invalid request to get task by any id.
+//     */
+//    @Test
+//    void getTaskByIdNOk() throws Exception {
+//        when(taskService.getTaskById(anyString())).thenThrow(TaskException.class);
+//        mockMvc.perform(
+//                get("/api/v1/task/1").contentType("application/json")
+//        ).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
+//    }
 }

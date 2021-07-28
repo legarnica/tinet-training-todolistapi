@@ -3,6 +3,9 @@ package cl.tinet.todolist.service;
 import cl.tinet.todolist.dao.TaskRepository;
 import cl.tinet.todolist.exceptions.TaskException;
 import cl.tinet.todolist.model.Task;
+import cl.tinet.todolist.model.TaskRequestTO;
+import cl.tinet.todolist.model.TaskResponseTO;
+import javassist.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -57,9 +61,24 @@ class TaskServiceTest {
     private final static String UPDATED_AT = "01-01-2021 00:00:00";
 
     /**
-     * Dummy Task to be used in test.
+     * Dummy Task.
      */
     private Task task;
+
+    /**
+     * Dummy Task to save.
+     */
+    private Task taskToSave;
+
+    /**
+     * Dummy TaskResponseTO.
+     */
+    private TaskResponseTO taskResponseTO;
+
+    /**
+     * Dummy TaskRequestTO.
+     */
+    private TaskRequestTO taskRequestTO;
 
     /**
      * Dummy List to use in test.
@@ -91,6 +110,26 @@ class TaskServiceTest {
                 .active(ACTIVE)
                 .createAt(CREATE_AT)
                 .updatedAt(UPDATED_AT).build();
+
+        taskToSave = Task.builder()
+                .title(TITLE)
+                .description(DESCRIPTION)
+                .state(STATE)
+                .active(ACTIVE)
+                .createAt(CREATE_AT)
+                .updatedAt(UPDATED_AT).build();
+
+        taskResponseTO = TaskResponseTO.builder()
+                .title(task.getTitle())
+                .description(task.getDescription())
+                .state(task.getState())
+                .createAt(task.getCreateAt())
+                .updatedAt(task.getUpdatedAt()).build();
+
+        taskRequestTO = new TaskRequestTO();
+
+        taskRequestTO.setTitle(task.getTitle());
+        taskRequestTO.setDescription(task.getDescription());
 
         tasks.add(task);
     }
@@ -176,4 +215,32 @@ class TaskServiceTest {
         }
         assertTrue(isInvalidParameter);
     }
+
+    /**
+     * Verify insertion of a task.
+     */
+    @Test
+    void setTaskOk() {
+        when(taskRepository.save(any())).thenReturn(task);
+        TaskResponseTO response = taskService.setTask(taskRequestTO);
+        assertEquals(TITLE, response.getTitle());
+    }
+
+    /**
+     * Verify insertion of a task failed.
+     */
+    @Test
+    void setTaskNoOk() {
+        task.setId(null);
+        when(taskRepository.save(any())).thenReturn(task);
+        boolean taskNotSet = false;
+
+        try {
+            taskService.setTask(taskRequestTO);
+        }catch (TaskException e) {
+            taskNotSet = true;
+        }
+        assertTrue(taskNotSet);
+    }
+
 }

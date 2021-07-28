@@ -3,14 +3,20 @@ package cl.tinet.todolist.service;
 import cl.tinet.todolist.dao.TaskRepository;
 import cl.tinet.todolist.exceptions.TaskException;
 import cl.tinet.todolist.model.Task;
+import cl.tinet.todolist.model.TaskRequestTO;
+import cl.tinet.todolist.model.TaskResponseTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
+
+import static java.util.Calendar.getInstance;
 
 /**
  * Service class for Task entity.
@@ -18,6 +24,16 @@ import java.util.List;
 @Service
 @Slf4j
 public class TaskService {
+
+    /**
+     * Value of undone task.
+     */
+    private static final int UNDONE = 0;
+
+    /**
+     * Value of a active task.
+     */
+    private static final boolean ACTIVE = true;
 
     /**
      * References to TaskRepository.
@@ -73,5 +89,54 @@ public class TaskService {
         }
         log.info("[getTasks - end] [task] [{}]",task);
         return task;
+    }
+
+    /**
+     * Insert a task in database.
+     *
+     * @param taskRequestTO data of task request.
+     * @return data of inserted task response.
+     */
+    public TaskResponseTO setTask(TaskRequestTO taskRequestTO) {
+        log.info("[setTask - init] [taskRequestTO] [{}]", taskRequestTO);
+
+        Task task = new Task();
+        task.setTitle(taskRequestTO.getTitle());
+        task.setDescription(taskRequestTO.getDescription());
+        task.setState(UNDONE);
+        task.setActive(ACTIVE);
+        task.setCreateAt(getActualDate());
+        task.setUpdatedAt(getActualDate());
+
+        Task taskSaved = taskRepository.save(task);
+
+        if(taskSaved.getId() == null) {
+            log.error("[setTask - error] [taskSaved] [{}]",taskSaved);
+            throw new TaskException("error setting task");
+        }
+
+        return TaskResponseTO.builder()
+                .title(taskSaved.getTitle())
+                .description(taskSaved.getDescription())
+                .state(taskSaved.getState())
+                .createAt(taskSaved.getCreateAt())
+                .updatedAt(taskSaved.getUpdatedAt()).build();
+    }
+
+    /**
+     * Get actual locale date, in string format.
+     *
+     * @return String actual locale date.
+     */
+    private String getActualDate() {
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+
+        Locale locale = new Locale("es", "CH");
+        TimeZone timeZone = TimeZone.getTimeZone("America/Santiago");
+
+        Date date = getInstance(timeZone, locale).getTime();
+
+        return format.format(date);
+
     }
 }
