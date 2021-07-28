@@ -34,6 +34,11 @@ public class TaskController {
     private final TaskService taskService;
 
     /**
+     * CustomResponse tiped with Task.
+     */
+    private CustomResponse<Task> responseTaskBody = new CustomResponse<>();
+
+    /**
      * Constructor of the class.
      * @param taskService see {@link #taskService}
      */
@@ -105,14 +110,14 @@ public class TaskController {
 
     /**
      /**
-     * Task to delete service.
+     * Task to update service.
      *
      * @return ResponseEntity
      */
     @PutMapping("/task/{id}")
-    public ResponseEntity<CustomResponse<Task>> update(
+    public ResponseEntity<CustomResponse<Task>> updateTask(
             @PathVariable String id, @Valid @RequestBody TaskRequestTO requestBody) {
-        log.info("[deleteTask - init] [requestBody][{}]", id);
+        log.info("[updateTask - init] [requestBody][{}]", id);
         CustomResponse<Task> responseBody = new CustomResponse<>();
         try{
             Task taskResponse = taskService.updateTask(id, requestBody);
@@ -122,6 +127,49 @@ public class TaskController {
         }catch (TaskException e) {
             responseBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+    /**
+     /**
+     * Task to delete service.
+     *
+     * @return ResponseEntity
+     */
+    @DeleteMapping("/task/{id}")
+    public ResponseEntity<CustomResponse<Task>> deleteTask(@PathVariable String id) {
+        log.info("[deleteTask - init] [requestBody][{}]", id);
+        CustomResponse<Task> responseBody = new CustomResponse<>();
+        try{
+            Task taskResponse = taskService.deleteTask(id);
+            responseBody.setBody(taskResponse);
+            responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        }catch (TaskException e) {
+            responseBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
+            return new ResponseEntity<>(responseBody, HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+     /**
+     * Toggle state of a task, to mark done or undone.
+     * If the task is done, then will be undone
+     * and vice versa.
+     *
+     * @param id task id.
+     * @return ResponseEntity.
+     */
+    @GetMapping("/task/toggle/{id}")
+    public ResponseEntity<CustomResponse<Task>> toggleState(@PathVariable String id) {
+        log.info("[toggleState - init] [id][{}]", id);
+        try{
+            Task taskResponse = taskService.updateState(id);
+            responseTaskBody.setBody(taskResponse);
+            responseTaskBody.setMessage(HttpStatus.OK.getReasonPhrase());
+            return new ResponseEntity<>(responseTaskBody, HttpStatus.OK);
+        }catch (TaskException e) {
+            responseTaskBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
+            return new ResponseEntity<>(responseTaskBody, HttpStatus.NOT_MODIFIED);
         }
     }
 }

@@ -31,9 +31,19 @@ public class TaskService {
     private static final int UNDONE = 0;
 
     /**
+     * Value of done task.
+     */
+    private static final int DONE = 1;
+
+    /**
      * Value of a active task.
      */
     private static final boolean ACTIVE = true;
+
+    /**
+     * Value of a inactive task.
+     */
+    private static final boolean INACTIVE = false;
 
     /**
      * References to TaskRepository.
@@ -137,16 +147,40 @@ public class TaskService {
         task.setDescription(requestBody.getDescription());
         task.setUpdatedAt(getActualDate());
 
-        Task updatedTask = null;
+        return taskRepository.save(task);
+    }
 
-        try {
-            updatedTask = taskRepository.save(task);
-        }catch (Exception e) {
-            log.error("[deleteTask - error] [task] [{}]",task);
-            throw new TaskException("error updating task");
-        }
+    /**
+     * Delete task service.
+     *
+     * @param requestId task id.
+     * @return updated task.
+     */
+    @Transactional
+    public Task deleteTask(String requestId) {
+        Task taskToDelete = this.getTaskById(requestId);
+        taskToDelete.setActive(INACTIVE);
+        taskToDelete.setUpdatedAt(getActualDate());
 
-        return updatedTask;
+        return taskRepository.save(taskToDelete);
+    }
+
+    /**
+     * Delete task service.
+     *
+     * @param requestId task id.
+     * @return updated task.
+     */
+    @Transactional
+    public Task updateState(String requestId) {
+        Task taskToSetTheState = this.getTaskById(requestId);
+
+        int newState = (taskToSetTheState.getState() == DONE) ? UNDONE : DONE;
+
+        taskToSetTheState.setState(newState);
+        taskToSetTheState.setUpdatedAt(getActualDate());
+
+        return taskRepository.save(taskToSetTheState);
     }
 
     /**
@@ -156,13 +190,10 @@ public class TaskService {
      */
     private String getActualDate() {
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
-
         Locale locale = new Locale("es", "CH");
         TimeZone timeZone = TimeZone.getTimeZone("America/Santiago");
-
         Date date = getInstance(timeZone, locale).getTime();
-
         return format.format(date);
-
     }
+
 }
