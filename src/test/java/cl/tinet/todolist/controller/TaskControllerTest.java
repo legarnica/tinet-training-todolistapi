@@ -147,6 +147,6 @@ class TaskControllerTest {
         when(taskService.getTaskById(anyString())).thenThrow(TaskException.class);
         mockMvc.perform(
                 get("/api/v1/task/1").contentType("application/json")
-        ).andExpect(status().is(HttpStatus.EXPECTATION_FAILED.value()));
+        ).andExpect(status().is(HttpStatus.NOT_FOUND.value()));
     }
 }

@@ -1,14 +1,17 @@
 package cl.tinet.todolist.controller;
 
 import cl.tinet.todolist.exceptions.TaskException;
+import cl.tinet.todolist.model.CustomResponse;
 import cl.tinet.todolist.model.Task;
 import cl.tinet.todolist.service.TaskService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,7 +21,6 @@ import java.util.List;
 @RequestMapping("/api/v1")
 @Slf4j
 public class TaskController {
-
     /**
      * References to TaskService.
      */
@@ -38,17 +40,18 @@ public class TaskController {
      * @return a list of all task
      */
     @GetMapping("/task")
-    public ResponseEntity<List<Task>> getAllTask() {
+    public ResponseEntity<CustomResponse<List<Task>>> getAllTask() {
         log.info("[getAllTask - init]");
-        List<Task> tasks = new ArrayList<>();
-        ResponseEntity<List<Task>> response = null;
+        ResponseEntity<CustomResponse<List<Task>>> responseEntity = null;
+        CustomResponse<List<Task>>  responseBody = new CustomResponse<>();
         try{
-            tasks = taskService.getTasks();
-            response = new ResponseEntity<>(tasks, HttpStatus.OK);
-            return response;
+            responseBody.setBody(taskService.getTasks());
+            responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
+            return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }catch (TaskException e) {
-            response = new ResponseEntity<>(tasks, HttpStatus.EXPECTATION_FAILED);
-            return response;
+            responseBody.setMessage(HttpStatus.EXPECTATION_FAILED.getReasonPhrase());
+            responseEntity = new ResponseEntity<>(responseBody, HttpStatus.EXPECTATION_FAILED);
+            return responseEntity;
         }
     }
 
@@ -59,17 +62,19 @@ public class TaskController {
      * @return a task.
      */
     @GetMapping("/task/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable String id){
+    public ResponseEntity<CustomResponse<Task>> getTaskById(@PathVariable String id){
         log.info("[getTaskById - init] [id][{}]", id);
-        Task task = null;
-        ResponseEntity<Task> response = null;
+        ResponseEntity<CustomResponse<Task>> responseEntity = null;
+        CustomResponse<Task> responseBody = new CustomResponse<>();
         try{
-            task = taskService.getTaskById(id);
-            response = new ResponseEntity<>(task, HttpStatus.OK);
-            return response;
+            responseBody.setBody(taskService.getTaskById(id));
+            responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
+            responseEntity = new ResponseEntity<>(responseBody, HttpStatus.OK);
+            return responseEntity;
         }catch (TaskException e) {
-            response = new ResponseEntity<>(task, HttpStatus.EXPECTATION_FAILED);
-            return response;
+            responseBody.setMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
+            responseEntity = new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
+            return responseEntity;
         }
     }
 }
