@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -259,4 +260,58 @@ class TaskControllerTest {
                         .contentType("application/json")
         ).andExpect(status().isNotModified());
     }
+
+    /**
+     * Performs a valid request to update task.
+     *
+     */
+    @Test
+    void deleteTaskOk() throws Exception{
+        when(taskService.deleteTask(any())).thenReturn(task);
+        mockMvc.perform(
+                delete("/api/v1/task/1")
+                        .contentType("application/json")
+        ).andExpect(status().isOk());
+
+    }
+
+    /**
+     * Performs a invalid request to delete task.
+     *
+     */
+    @Test
+    void deleteTaskNoOk() throws Exception {
+        when(taskService.deleteTask(any())).thenThrow(TaskException.class);
+        mockMvc.perform(
+                delete("/api/v1/task/1")
+                        .contentType("application/json")
+        ).andExpect(status().isNotModified());
+    }
+    /**
+     * Performs a valid request to delete state of task.
+     *
+     */
+    @Test
+    void toggleTaskOk() throws Exception{
+        when(taskService.updateState(any())).thenReturn(task);
+        mockMvc.perform(
+                get("/api/v1/task/toggle/1")
+                        .contentType("application/json")
+        ).andExpect(status().isOk());
+
+    }
+
+    /**
+     * Performs a invalid request to update state of task.
+     *
+     */
+    @Test
+    void toggleTaskNoOk() throws Exception {
+        when(taskService.updateState(any())).thenThrow(TaskException.class);
+        mockMvc.perform(
+                get("/api/v1/task/toggle/1")
+                        .contentType("application/json")
+        ).andExpect(status().isNotModified());
+    }
+
 }

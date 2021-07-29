@@ -132,7 +132,8 @@ public class TaskController {
 
     /**
      /**
-     * Task to delete service.
+     * Service to delete a Task.
+     * (Logical delete)
      *
      * @return ResponseEntity
      */
