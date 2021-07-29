@@ -142,6 +142,7 @@ public class TaskService {
      */
     @Transactional
     public Task updateTask(String requestId, TaskRequestTO requestBody) {
+        log.info("[updateTask - init] [requestId, requestBody] [{}, {}]", requestId, requestBody);
         Task task = this.getTaskById(requestId);
         task.setTitle(requestBody.getTitle());
         task.setDescription(requestBody.getDescription());
@@ -158,11 +159,12 @@ public class TaskService {
      */
     @Transactional
     public Task deleteTask(String requestId) {
-        Task taskToDelete = this.getTaskById(requestId);
-        taskToDelete.setActive(INACTIVE);
-        taskToDelete.setUpdatedAt(getActualDate());
-
-        return taskRepository.save(taskToDelete);
+        log.info("[deleteTask - init] [requestId] [{}]", requestId);
+        Task taskDeleted = this.getTaskById(requestId);
+        taskDeleted.setActive(INACTIVE);
+        taskDeleted.setUpdatedAt(getActualDate());
+        taskRepository.save(taskDeleted);
+        return taskDeleted;
     }
 
     /**
@@ -173,14 +175,14 @@ public class TaskService {
      */
     @Transactional
     public Task updateState(String requestId) {
-        Task taskToSetTheState = this.getTaskById(requestId);
+        log.info("[updateState - init] [requestId] [{}]", requestId);
+        Task updatedTask = this.getTaskById(requestId);
+        int newState = (updatedTask.getState() == DONE) ? UNDONE : DONE;
+        updatedTask.setState(newState);
+        updatedTask.setUpdatedAt(getActualDate());
+        taskRepository.save(updatedTask);
 
-        int newState = (taskToSetTheState.getState() == DONE) ? UNDONE : DONE;
-
-        taskToSetTheState.setState(newState);
-        taskToSetTheState.setUpdatedAt(getActualDate());
-
-        return taskRepository.save(taskToSetTheState);
+        return updatedTask;
     }
 
     /**
@@ -189,10 +191,12 @@ public class TaskService {
      * @return String actual locale date.
      */
     private String getActualDate() {
+        log.info("[getActualDate - init]");
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         Locale locale = new Locale("es", "CH");
         TimeZone timeZone = TimeZone.getTimeZone("America/Santiago");
         Date date = getInstance(timeZone, locale).getTime();
+        log.info("[getActualDate - end]: [date] [{}]", date);
         return format.format(date);
     }
 

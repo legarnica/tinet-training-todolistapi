@@ -16,8 +16,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
@@ -44,6 +47,11 @@ class TaskServiceTest {
      * Dummy value for state Task attribute.
      */
     private final static int STATE = 0;
+
+    /**
+     * Dummy value for active state Task attribute.
+     */
+    private final static int ACTIVE_STATE = 1;
 
     /**
      * Dummy value for active Task attribute.
@@ -252,6 +260,44 @@ class TaskServiceTest {
         when(taskRepository.save(any())).thenReturn(task);
         Task response = taskService.updateTask("1", taskRequestTO);
         assertEquals(TITLE, response.getTitle());
+    }
+
+    /**
+     * Verify logical delete service of a task.
+     */
+    @Test
+    void deleteTask() {
+        when(taskRepository.findById(any())).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenReturn(task);
+        Task response = taskService.deleteTask("1");
+        assertFalse(response.isActive());
+    }
+
+    /**
+     * Verify toggle state of a task.
+     */
+    @Test
+    void updateState() {
+        when(taskRepository.findById(any())).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenReturn(task);
+        Task taskBeforeUpdate = new Task();
+        taskBeforeUpdate.setState(task.getState());
+        Task taskAfterUpdate = taskService.updateState("1");
+        assertNotEquals(taskAfterUpdate.getState(), taskBeforeUpdate.getState());
+    }
+
+    /**
+     * Verify toggle state to Done of a task.
+     */
+    @Test
+    void updateStateDone() {
+        task.setState(ACTIVE_STATE);
+        when(taskRepository.findById(any())).thenReturn(Optional.of(task));
+        when(taskRepository.save(any())).thenReturn(task);
+        Task taskBeforeUpdate = new Task();
+        taskBeforeUpdate.setState(task.getState());
+        Task taskAfterUpdate = taskService.updateState("1");
+        assertNotEquals(taskAfterUpdate.getState(), taskBeforeUpdate.getState());
     }
 
 }
