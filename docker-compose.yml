@@ -1,33 +1,43 @@
 version: '3'
 
 services:
-
   myapp-mysql:
     image: mysql:5.7
     environment:
+      - MYSQL_HOST=localhost
       - MYSQL_ROOT_PASSWORD=secret
       - MYSQL_DATABASE=todolist
-      - MYSQL_USER=user
+      - MYSQL_USER=luis
       - MYSQL_PASSWORD=secret
     ports:
-      - 3306:33061
+      - 33061:3306
 
   myapp-main:
-    image: 964196a4ad27
+    image: webapp
     restart: on-failure
     networks:
-      - spring-boot-mysql-network
+      - common-network
     depends_on:
       - myapp-mysql
     ports:
       - 8080:8080
     environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_DATABASE=todolist
+      - MYSQL_HOST=172.17.0.1
+      - MYSQL_PORT=33061
       - DATABASE_HOST=localhost
-      - DATABASE_USER=user
+      - DATABASE_USER=luis
       - DATABASE_PASSWORD=secret
       - DATABASE_NAME=todolist
-      - DATABASE_PORT=33061
+      - DATABASE_PORT=3306
 
+#Docker Networks
 networks:
-  spring-boot-mysql-network:
+  common-network:
     driver: bridge
+
+#Volumes
+volumes:
+  dbdata:
+    driver: local

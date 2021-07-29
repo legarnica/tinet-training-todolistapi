@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(SpringExtension.class)
@@ -224,6 +225,36 @@ class TaskControllerTest {
         String body = asJsonString(taskRequestTO);
         mockMvc.perform(
                 post("/api/v1/task")
+                        .content(body)
+                        .contentType("application/json")
+        ).andExpect(status().isNotModified());
+    }
+    /**
+     * Performs a valid request to update task.
+     *
+     */
+    @Test
+    void updateTaskOk() throws Exception{
+        when(taskService.updateTask(any(), any())).thenReturn(task);
+        String body = asJsonString(taskRequestTO);
+        mockMvc.perform(
+                put("/api/v1/task/1")
+                        .content(body)
+                        .contentType("application/json")
+        ).andExpect(status().isCreated());
+
+    }
+
+    /**
+     * Performs a invalid request to update task.
+     *
+     */
+    @Test
+    void updateTaskNoOk() throws Exception {
+        when(taskService.updateTask(any(), any())).thenThrow(TaskException.class);
+        String body = asJsonString(taskRequestTO);
+        mockMvc.perform(
+                put("/api/v1/task/1")
                         .content(body)
                         .contentType("application/json")
         ).andExpect(status().isNotModified());

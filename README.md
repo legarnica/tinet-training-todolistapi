@@ -1,23 +1,23 @@
 # Getting Started.
 
-## v1
+### Requirements
++ Docker 20.10.7+
++ Docker-compose 1.29.2+
 
-run docker command
+### Execute application.
 
-```shell
-docker run -d -p 33061:3306 --name mysql57 -e MYSQL_ROOT_PASSWORD=secret mysql:5.7 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-```
-
-In the container, we must create an schema named todolist.
+run docker command.
 
 ```shell
-mysql -uroot -p
-#secret
-create schema todolist;
-commit;
+docker build -t webapp .
 ```
-Then run the application. 
 
-## Sagger ui
+After build, you must execute the next command.
+
+```shell
+docker-compose up
+```
+
+### Sagger ui
 After run the application, go to swagger documentation: http://localhost:8080/swagger-ui.html
 
