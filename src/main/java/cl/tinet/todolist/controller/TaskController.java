@@ -61,6 +61,7 @@ public class TaskController {
             responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }catch (TaskException e) {
+            log.info("[getAllTask - error]", e);
             responseBody.setMessage(HttpStatus.EXPECTATION_FAILED.getReasonPhrase());
             responseEntity = new ResponseEntity<>(responseBody, HttpStatus.EXPECTATION_FAILED);
             return responseEntity;
@@ -82,6 +83,7 @@ public class TaskController {
             responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }catch (TaskException e) {
+            log.info("[getTaskById - error] [id]:[{}]", id, e);
             responseBody.setMessage(HttpStatus.NOT_FOUND.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_FOUND);
         }
@@ -99,10 +101,12 @@ public class TaskController {
         CustomResponse<TaskResponseTO> responseBody = new CustomResponse<>();
         try{
             TaskResponseTO taskResponse = taskService.setTask(requestBody);
+            log.info("[setTask - response from service] [taskResponse]:[{}]", taskResponse);
             responseBody.setBody(taskResponse);
             responseBody.setMessage(HttpStatus.CREATED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
         }catch (TaskException e) {
+            log.info("[setTask - error] [requestBody]:[{}]", requestBody, e);
             responseBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_MODIFIED);
         }
@@ -117,14 +121,16 @@ public class TaskController {
     @PutMapping("/task/{id}")
     public ResponseEntity<CustomResponse<Task>> updateTask(
             @PathVariable String id, @Valid @RequestBody TaskRequestTO requestBody) {
-        log.info("[updateTask - init] [requestBody][{}]", id);
+        log.info("[updateTask - init] [requestBody][{}]", requestBody);
         CustomResponse<Task> responseBody = new CustomResponse<>();
         try{
             Task taskResponse = taskService.updateTask(id, requestBody);
+            log.info("[updateTask - response from service] [taskResponse]:[{}]", taskResponse);
             responseBody.setBody(taskResponse);
             responseBody.setMessage(HttpStatus.CREATED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.CREATED);
         }catch (TaskException e) {
+            log.info("[updateTask - error] [requestBody]:[{}]", requestBody, e);
             responseBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_MODIFIED);
         }
@@ -143,10 +149,12 @@ public class TaskController {
         CustomResponse<Task> responseBody = new CustomResponse<>();
         try{
             Task taskResponse = taskService.deleteTask(id);
+            log.info("[deleteTask - response from service] [taskResponse]:[{}]", taskResponse);
             responseBody.setBody(taskResponse);
             responseBody.setMessage(HttpStatus.OK.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.OK);
         }catch (TaskException e) {
+            log.info("[deleteTask - error] [id]:[{}]", id, e);
             responseBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
             return new ResponseEntity<>(responseBody, HttpStatus.NOT_MODIFIED);
         }
@@ -165,10 +173,12 @@ public class TaskController {
         log.info("[toggleState - init] [id][{}]", id);
         try{
             Task taskResponse = taskService.updateState(id);
+            log.info("[toggleState - response from service] [taskResponse]:[{}]", taskResponse);
             responseTaskBody.setBody(taskResponse);
             responseTaskBody.setMessage(HttpStatus.OK.getReasonPhrase());
             return new ResponseEntity<>(responseTaskBody, HttpStatus.OK);
         }catch (TaskException e) {
+            log.info("[toggleState - error] [id]:[{}]", id, e);
             responseTaskBody.setMessage(HttpStatus.NOT_MODIFIED.getReasonPhrase());
             return new ResponseEntity<>(responseTaskBody, HttpStatus.NOT_MODIFIED);
         }
