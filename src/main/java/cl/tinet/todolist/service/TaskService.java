@@ -86,20 +86,22 @@ public class TaskService {
     @Transactional(readOnly = true)
     public Task getTaskById(String taskId){
         log.info("[getTaskById - init] [id] [{}]", taskId);
-        Task task = null;
+
+        long id;
         try {
-            task = taskRepository.findById(Long.valueOf(taskId)).orElseGet(Task::new);
+            id = Long.parseLong(taskId);
         }catch (NumberFormatException e){
             log.error("[getTaskById - error] [while trying to transform][taskId][{}]", taskId, e);
-            throw new TaskException("getTaskById - error");
+            throw new TaskException(TaskException.NUMBER_FORMAT_EXCEPTION_MSG);
         }
-        if(task.getId() == null) {
+        Task taskFound = taskRepository.findById(id).orElseGet(Task::new);
+        if(taskFound.getId() == null) {
             log.error("[getTaskById - error] [task with][id][{}][was not found]", taskId);
-            throw new TaskException("getTaskById - error");
+            throw new TaskException(TaskException.TASK_NOT_FOUND_MSG);
         }
-        log.info("[getTasks - success] [task] [{}] [was found]",task);
+        log.info("[getTasks - success] [taskFound] [{}] [was found]",taskFound);
 
-        return task;
+        return taskFound;
     }
 
     /**
@@ -123,7 +125,7 @@ public class TaskService {
         log.info("[setTask] [the] [task] [{}] [was saved]", taskSaved);
         if(taskSaved.getId() == null) {
             log.error("[setTask - error] [task with][id][{}][was not saved]", taskSaved);
-            throw new TaskException("setTask - error");
+            throw new TaskException(TaskException.TASK_WAS_NOT_UPDATED_MSG);
         }
         log.info("[setTask - success] [task] [{}] [was set]",taskSaved);
         TaskResponseTO responseTO = TaskResponseTO.builder()

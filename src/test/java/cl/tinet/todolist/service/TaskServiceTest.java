@@ -191,7 +191,7 @@ class TaskServiceTest {
         Exception exception = assertThrows(TaskException.class, () -> {
             taskService.getTaskById(id);
         });
-        assertEquals("getTaskById - error", exception.getMessage());
+        assertEquals(TaskException.TASK_NOT_FOUND_MSG, exception.getMessage());
     }
 
     /**
@@ -208,7 +208,7 @@ class TaskServiceTest {
         Exception exception = assertThrows(TaskException.class, () -> {
             taskService.getTaskById(id);
         });
-        assertEquals("getTaskById - error", exception.getMessage());
+        assertEquals(TaskException.NUMBER_FORMAT_EXCEPTION_MSG, exception.getMessage());
     }
 
     /**
@@ -232,7 +232,7 @@ class TaskServiceTest {
             taskService.setTask(taskRequestTO);
         });
 
-        assertEquals("setTask - error", exception.getMessage());
+        assertEquals(TaskException.TASK_WAS_NOT_UPDATED_MSG, exception.getMessage());
     }
 
     /**
