@@ -18,9 +18,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 /**
@@ -158,13 +158,11 @@ class TaskServiceTest {
     @Test
     void getTasksNOk() {
         when(taskRepository.findAll()).thenThrow(TaskException.class);
-        boolean isNotOk = false;
-        try{
+        Exception exception = assertThrows(TaskException.class, () -> {
             taskService.getTasks();
-        }catch(TaskException e){
-            isNotOk = true;
-        }
-        assertTrue(isNotOk);
+        });
+
+        assertEquals("error to get tasks", exception.getMessage());
     }
 
     /**
@@ -189,18 +187,11 @@ class TaskServiceTest {
         String id = "200";
         Long taskId = Long.valueOf(id);
         Task emptyTask = Task.builder().build();
-
-        boolean thereIsNotTaskWithThisId = false;
-
         when(taskRepository.findById(taskId)).thenReturn(Optional.of(emptyTask));
-
-        try {
+        Exception exception = assertThrows(TaskException.class, () -> {
             taskService.getTaskById(id);
-        }catch (TaskException e) {
-            thereIsNotTaskWithThisId = true;
-        }
-
-        assertTrue(thereIsNotTaskWithThisId);
+        });
+        assertEquals("getTaskById - error", exception.getMessage());
     }
 
     /**
@@ -214,14 +205,10 @@ class TaskServiceTest {
     @Test
     void getTaskByIdNotOKParsing() {
         String id = "q";
-        boolean isInvalidParameter = false;
-
-        try {
+        Exception exception = assertThrows(TaskException.class, () -> {
             taskService.getTaskById(id);
-        }catch (Exception e) {
-            isInvalidParameter = true;
-        }
-        assertTrue(isInvalidParameter);
+        });
+        assertEquals("getTaskById - error", exception.getMessage());
     }
 
     /**
@@ -241,14 +228,11 @@ class TaskServiceTest {
     void setTaskNoOk() {
         task.setId(null);
         when(taskRepository.save(any())).thenReturn(task);
-        boolean taskNotSet = false;
-
-        try {
+        Exception exception = assertThrows(TaskException.class, () -> {
             taskService.setTask(taskRequestTO);
-        }catch (TaskException e) {
-            taskNotSet = true;
-        }
-        assertTrue(taskNotSet);
+        });
+
+        assertEquals("setTask - error", exception.getMessage());
     }
 
     /**
