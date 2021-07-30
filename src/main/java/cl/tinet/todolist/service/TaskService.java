@@ -90,14 +90,15 @@ public class TaskService {
         try {
             task = taskRepository.findById(Long.valueOf(taskId)).orElseGet(Task::new);
         }catch (NumberFormatException e){
-            log.error("[getTaskById - error] [taskId] [{}]",taskId, e);
-            throw new TaskException("id structure error");
+            log.error("[getTaskById - error] [while trying to transform][taskId][{}]", taskId, e);
+            throw new TaskException("getTaskById - error");
         }
         if(task.getId() == null) {
-            log.error("[getTaskById - error] [task] [{}]",task);
-            throw new TaskException("error to get task");
+            log.error("[getTaskById - error] [task with][id][{}][was not found]", taskId);
+            throw new TaskException("getTaskById - error");
         }
-        log.info("[getTasks - end] [task] [{}]",task);
+        log.info("[getTasks - success] [task] [{}] [was found]",task);
+
         return task;
     }
 
@@ -110,7 +111,6 @@ public class TaskService {
     @Transactional
     public TaskResponseTO setTask(TaskRequestTO taskRequestTO) {
         log.info("[setTask - init] [taskRequestTO] [{}]", taskRequestTO);
-
         Task task = new Task();
         task.setTitle(taskRequestTO.getTitle());
         task.setDescription(taskRequestTO.getDescription());
@@ -118,20 +118,22 @@ public class TaskService {
         task.setActive(ACTIVE);
         task.setCreateAt(getActualDate());
         task.setUpdatedAt(getActualDate());
-
+        log.info("[setTask] [the] [task] [{}] [will be saved]", task);
         Task taskSaved = taskRepository.save(task);
-
+        log.info("[setTask] [the] [task] [{}] [was saved]", taskSaved);
         if(taskSaved.getId() == null) {
-            log.error("[setTask - error] [taskSaved] [{}]",taskSaved);
-            throw new TaskException("error setting task");
+            log.error("[setTask - error] [task with][id][{}][was not saved]", taskSaved);
+            throw new TaskException("setTask - error");
         }
-
-        return TaskResponseTO.builder()
+        log.info("[setTask - success] [task] [{}] [was set]",taskSaved);
+        TaskResponseTO responseTO = TaskResponseTO.builder()
                 .title(taskSaved.getTitle())
                 .description(taskSaved.getDescription())
                 .state(taskSaved.getState())
                 .createAt(taskSaved.getCreateAt())
                 .updatedAt(taskSaved.getUpdatedAt()).build();
+        log.info("[setTask - success] [responseTO] [{}]",responseTO);
+        return responseTO;
     }
 
     /**
@@ -148,7 +150,11 @@ public class TaskService {
         task.setDescription(requestBody.getDescription());
         task.setUpdatedAt(getActualDate());
 
-        return taskRepository.save(task);
+        log.info("[updateTask] [task to be saved] [task] [{}]", task);
+        Task updatedTask = taskRepository.save(task);
+        log.info("[updateTask - success] [updatedTask] [{}]", updatedTask);
+
+        return updatedTask;
     }
 
     /**
@@ -160,11 +166,13 @@ public class TaskService {
     @Transactional
     public Task deleteTask(String requestId) {
         log.info("[deleteTask - init] [requestId] [{}]", requestId);
-        Task taskDeleted = this.getTaskById(requestId);
-        taskDeleted.setActive(INACTIVE);
-        taskDeleted.setUpdatedAt(getActualDate());
-        taskRepository.save(taskDeleted);
-        return taskDeleted;
+        Task taskToBeDeleted = this.getTaskById(requestId);
+        taskToBeDeleted.setActive(INACTIVE);
+        taskToBeDeleted.setUpdatedAt(getActualDate());
+        log.info("[deleteTask] [task to be deleted] [taskToBeDeleted] [{}]", taskToBeDeleted);
+        Task deletedTask = taskRepository.save(taskToBeDeleted);
+        log.info("[deleteTask - success] [deletedTask] [{}]", deletedTask);
+        return deletedTask;
     }
 
     /**
@@ -176,11 +184,14 @@ public class TaskService {
     @Transactional
     public Task updateState(String requestId) {
         log.info("[updateState - init] [requestId] [{}]", requestId);
-        Task updatedTask = this.getTaskById(requestId);
-        int newState = (updatedTask.getState() == DONE) ? UNDONE : DONE;
-        updatedTask.setState(newState);
-        updatedTask.setUpdatedAt(getActualDate());
-        taskRepository.save(updatedTask);
+        Task taskBeforeUpdated = this.getTaskById(requestId);
+        int newState = (taskBeforeUpdated.getState() == DONE) ? UNDONE : DONE;
+        taskBeforeUpdated.setState(newState);
+        taskBeforeUpdated.setUpdatedAt(getActualDate());
+
+        log.info("[updateState] [task to be updated] [taskBeforeUpdated] [{}]", taskBeforeUpdated);
+        Task updatedTask = taskRepository.save(taskBeforeUpdated);
+        log.info("[updateState - success] [deletedTask] [{}]", updatedTask);
 
         return updatedTask;
     }
