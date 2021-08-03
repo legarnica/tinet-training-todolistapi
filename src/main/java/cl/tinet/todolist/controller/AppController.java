@@ -12,6 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/")
 public class AppController {
 
+    /**
+     * Useful to prevent error logs in aws.bs
+     *
+     * @return ResponseEntity
+     */
     @GetMapping
     public ResponseEntity<CustomResponse<String>> isAlive(){
         CustomResponse<String> customResponse = new CustomResponse<>();
