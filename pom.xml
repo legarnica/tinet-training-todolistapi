@@ -95,13 +95,13 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <properties>
-                <profilesActive>dev</profilesActive>
+                <spring.profiles.active>dev</spring.profiles.active>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
             <properties>
-                <profilesActive>prod</profilesActive>
+                <spring.profiles.active>prod</spring.profiles.active>
             </properties>
         </profile>
     </profiles>
