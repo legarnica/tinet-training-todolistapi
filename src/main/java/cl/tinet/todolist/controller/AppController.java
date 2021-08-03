@@ -20,7 +20,7 @@ public class AppController {
     @GetMapping
     public ResponseEntity<CustomResponse<String>> isAlive(){
         CustomResponse<String> customResponse = new CustomResponse<>();
-        customResponse.setMessage("it's alive");
+        customResponse.setMessage("hello nino");
 
         return new ResponseEntity<>(customResponse, HttpStatus.OK);
     }
